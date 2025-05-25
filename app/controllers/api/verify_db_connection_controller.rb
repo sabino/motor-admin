@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'motor/big_query'
+
 module Api
   class VerifyDbConnectionController < ApiBaseController
     InvalidUrl = Class.new(StandardError)
@@ -21,6 +23,8 @@ module Api
         TinyTds::Client.new(parse_options(url)).close
       elsif url.starts_with?('mysql')
         Mysql2::Client.new(parse_options(url)).close
+      elsif url.starts_with?('bigquery')
+        Motor::BigQuery.verify!(url)
       else
         raise InvalidUrl, 'Database URL is invalid'
       end
