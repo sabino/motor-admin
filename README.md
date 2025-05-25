@@ -52,7 +52,8 @@ docker compose up
 * [Optimized for mobile](#optimized-for-mobile)
 * [Configurations Sync](https://github.com/motor-admin/motor-admin/tree/master/guides/configurations_sync_between_environments.md)
 * [Roles and permissions control](https://docs.getmotoradmin.com/guide/roles_and_permissions.html)
-* Multiple databases support
+* Multiple databases support (PostgreSQL, MySQL, SQL Server, BigQuery)
+* Optional read-only database connections
 * Audit log
 * Personalized report alerts via Slack
 
