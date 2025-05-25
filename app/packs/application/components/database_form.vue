@@ -122,6 +122,15 @@
           placeholder="public, custom_schema"
         />
       </FormItem>
+      <FormItem
+        prop="read_only"
+        label="Read Only"
+        class="col-12"
+      >
+        <Switch
+          v-model="dataConfigs.read_only"
+        />
+      </FormItem>
     </div>
     <VButton
       type="primary"
@@ -172,7 +181,7 @@ export default {
     return {
       isError: false,
       isLoading: false,
-      dataConfigs: {}
+      dataConfigs: { read_only: false }
     }
   },
   computed: {
@@ -185,14 +194,15 @@ export default {
         }],
         url: [{ required: true }],
         host: [{ required: true }],
-        port: [{ required: true }]
+        port: [{ required: this.dataConfigs.protocol !== 'bigquery' }]
       }
     },
     dbTypeOptions () {
       return [
         { label: 'PostgreSQL', value: 'postgres' },
         { label: 'MySQL', value: 'mysql2' },
-        { label: 'SQL Server', value: 'sqlserver' }
+        { label: 'SQL Server', value: 'sqlserver' },
+        { label: 'BigQuery', value: 'bigquery' }
       ]
     }
   },
@@ -217,6 +227,13 @@ export default {
     assignUrl () {
       const { username, protocol, host, password, database, port } = this.dataConfigs
 
+      if (protocol === 'bigquery') {
+        if (host && database) {
+          this.dataConfigs.url = `${protocol}://${host}/${database}`
+        }
+        return
+      }
+
       if (host && port && database) {
         this.dataConfigs.url = `${protocol}://`
 
@@ -239,6 +256,9 @@ export default {
           this.submitDefault()
         } else {
           const dbConfig = { name: this.dataConfigs.name, url: this.dataConfigs.url.replace('mysql://', 'mysql2://').replace('postgresql://', 'postgres://') }
+          if (this.dataConfigs.read_only) {
+            dbConfig.read_only = true
+          }
 
           if (this.dataConfigs.schema_search_path?.match(/\w/)) {
             dbConfig.schema_search_path = this.dataConfigs.schema_search_path
