@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'motor/big_query'
+require 'motor/read_only_model'
+
 module Motor
   module DefineConnectionClasses
     MUTEX = Mutex.new
@@ -18,15 +21,26 @@ module Motor
 
           base_class = fetch_or_define_base_class(db_name)
 
-          if base_class.connection_db_config.try(:url) != db_url
-            base_class.establish_connection(url: db_url, prepared_statements: false)
+          if db_url.starts_with?('bigquery')
+            base_class.singleton_class.attr_accessor :bigquery_url, :bigquery_metadata
+            base_class.bigquery_url = db_url
+            base_class.bigquery_metadata = Motor::BigQuery.fetch_metadata(db_url)
+            base_class.include(Motor::ReadOnlyModel) unless base_class < Motor::ReadOnlyModel
+          else
+            if base_class.connection_db_config.try(:url) != db_url
+              base_class.establish_connection(url: db_url, prepared_statements: false)
 
-            if db_configs['schema_search_path'].present?
-              base_class.connection.schema_search_path = db_configs['schema_search_path']
+              if db_configs['schema_search_path'].present?
+                base_class.connection.schema_search_path = db_configs['schema_search_path']
+              end
+            end
+
+            Motor::DefineArModels.call(base_class)
+
+            if db_configs['read_only']
+              base_class.include(Motor::ReadOnlyModel) unless base_class < Motor::ReadOnlyModel
             end
           end
-
-          Motor::DefineArModels.call(base_class)
         end
 
       clear_removed_connection_classes(base_classes)

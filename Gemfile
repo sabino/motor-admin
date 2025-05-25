@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '3.2.0'
+ruby '3.4.4'
 
 gem 'activerecord-sqlserver-adapter'
 gem 'ar_lazy_preload'
@@ -13,6 +13,7 @@ gem 'devise'
 gem 'dotenv'
 gem 'fast_blank'
 gem 'google-cloud-storage'
+gem 'google-cloud-bigquery'
 gem 'image_processing'
 gem 'jwt'
 gem 'lograge'
